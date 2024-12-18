@@ -29,7 +29,6 @@
     },
     "plugins": [
       "expo-router",
-<<<<<<< HEAD
       [
         "expo-sqlite",
         {
@@ -40,13 +39,12 @@
             "useSQLCipher": false
           },
           "ios": {
-            "customBuildFlags": ["-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"]
+            "customBuildFlags": [
+              "-DSQLITE_ENABLE_DBSTAT_VTAB=1 -DSQLITE_ENABLE_SNAPSHOT=1"
+            ]
           }
         }
       ]
-=======
-      "expo-sqlite"
->>>>>>> 6d46260 (OUI)
     ],
     "experiments": {
       "typedRoutes": true
