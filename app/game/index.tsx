@@ -1,7 +1,8 @@
-import { Pressable, StyleSheet } from "react-native";
+import { Button, Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { useGameBoard } from "@/utils/store/game";
+import { Link } from "expo-router";
 
 const CELL_SIZE = 35;
 
@@ -18,6 +19,23 @@ export default function TabOneScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.container}>
+        <Link href="/home" asChild>
+          <Button title="Back button" />
+        </Link>
+        <View>
+          <View>
+            <Text style={styles.title}>Player 1</Text>
+            <Text style={styles.title}>Player 2</Text>
+          </View>
+          <View>
+            <Button title="Switch grid" />
+            <Button title="FIRE !!!" />
+          </View>
+        </View>
+        <View>grid</View>
+      </View>
+
       {players[playerTurn].board.map((rowArray, row) => {
         return (
           <View key={row} style={styles.row}>

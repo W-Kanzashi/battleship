@@ -56,10 +56,11 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GameBoardProvider>
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-          <Stack.Screen name="game" options={{ presentation: "modal" }} />
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="home" options={{ headerShown: false }} />
+          <Stack.Screen name="new-game" options={{ headerShown: false }} />
+          <Stack.Screen name="rules" options={{ headerShown: false }} />
+          <Stack.Screen name="game" options={{ headerShown: false }} />
         </Stack>
       </GameBoardProvider>
     </ThemeProvider>
