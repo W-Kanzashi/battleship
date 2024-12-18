@@ -4,46 +4,49 @@ import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
 import React from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function NewGame() {
   const [playeOneName, onChangePlayerOneName] = React.useState("");
   const [playeTwoName, onChangePlayerTwoName] = React.useState("");
 
   return (
-    <View style={styles.container}>
-      <Link href="/home" style={styles.backButton} asChild>
-        <Pressable>
-          <AntDesign name="arrowleft" size={24} color="white" />
-        </Pressable>
-      </Link>
-      <Text style={styles.title}>Start a new game</Text>
-      <Text style={styles.placeholder}>Enter player 1 name</Text>
-      <TextInput
-        style={styles.nameInput}
-        value={playeOneName}
-        maxLength={10}
-        onChangeText={onChangePlayerOneName}
-        placeholder="Player 1 name"
-      />
-      <Text style={styles.placeholder}>Enter player 2 name</Text>
-      <TextInput
-        style={styles.nameInput}
-        value={playeTwoName}
-        maxLength={10}
-        onChangeText={onChangePlayerTwoName}
-        placeholder="Player 2 name"
-      />
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Link href="/home" style={styles.backButton} asChild>
+          <Pressable>
+            <AntDesign name="arrowleft" size={24} color="white" />
+          </Pressable>
+        </Link>
+        <Text style={styles.title}>Start a new game</Text>
+        <Text style={styles.placeholder}>Enter player 1 name</Text>
+        <TextInput
+          style={styles.nameInput}
+          value={playeOneName}
+          maxLength={10}
+          onChangeText={onChangePlayerOneName}
+          placeholder="Player 1 name"
+        />
+        <Text style={styles.placeholder}>Enter player 2 name</Text>
+        <TextInput
+          style={styles.nameInput}
+          value={playeTwoName}
+          maxLength={10}
+          onChangeText={onChangePlayerTwoName}
+          placeholder="Player 2 name"
+        />
 
-      <Link
-        href="/new-game/boat-placement"
-        style={styles.pressableButton}
-        asChild
-      >
-        <Pressable>
-          <Text style={styles.buttonText}>Start boats placement</Text>
-        </Pressable>
-      </Link>
-    </View>
+        <Link
+          href="/new-game/boat-placement"
+          style={styles.pressableButton}
+          asChild
+        >
+          <Pressable>
+            <Text style={styles.buttonText}>Start boats placement</Text>
+          </Pressable>
+        </Link>
+      </View>
+    </SafeAreaView>
   );
 }
 

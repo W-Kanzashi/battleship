@@ -12,6 +12,7 @@ import "react-native-reanimated";
 
 import { useColorScheme } from "@/components/useColorScheme";
 import { GameBoardProvider } from "@/utils/store/game";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -56,12 +57,14 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GameBoardProvider>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="home" options={{ headerShown: false }} />
-          <Stack.Screen name="new-game" options={{ headerShown: false }} />
-          <Stack.Screen name="rules" options={{ headerShown: false }} />
-          <Stack.Screen name="game" options={{ headerShown: false }} />
-        </Stack>
+        <SafeAreaProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="home" options={{ headerShown: false }} />
+            <Stack.Screen name="new-game" options={{ headerShown: false }} />
+            <Stack.Screen name="rules" options={{ headerShown: false }} />
+            <Stack.Screen name="game" options={{ headerShown: false }} />
+          </Stack>
+        </SafeAreaProvider>
       </GameBoardProvider>
     </ThemeProvider>
   );

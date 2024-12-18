@@ -5,24 +5,27 @@ import { Link } from "expo-router";
 import React from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function BoatPlacement() {
   return (
-    <View style={styles.container}>
-      <Link href="/new-game" style={styles.backButton} asChild>
-        <Pressable>
-          <AntDesign name="arrowleft" size={24} color="white" />
-        </Pressable>
-      </Link>
-      <Text style={styles.title}>Player name, place your boats</Text>
-      <View>
-        <Pressable style={styles.pressableButton}>
-          <Text style={styles.buttonText}>Confirm placement</Text>
-        </Pressable>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Link href="/new-game" style={styles.backButton} asChild>
+          <Pressable>
+            <AntDesign name="arrowleft" size={24} color="white" />
+          </Pressable>
+        </Link>
+        <Text style={styles.title}>Player name, place your boats</Text>
+        <View>
+          <Pressable style={styles.pressableButton}>
+            <Text style={styles.buttonText}>Confirm placement</Text>
+          </Pressable>
+          <Image></Image>
+        </View>
         <Image></Image>
       </View>
-      <Image></Image>
-    </View>
+    </SafeAreaView>
   );
 }
 

@@ -3,6 +3,7 @@ import { Button, Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/Themed";
 import { useGameBoard } from "@/utils/store/game";
 import { Link } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const CELL_SIZE = 35;
 
@@ -18,82 +19,85 @@ export default function TabOneScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Link href="/home" asChild>
-          <Button title="Back button" />
-        </Link>
-        <View>
+        <View style={styles.container}>
+          <Link href="/home" asChild>
+            <Button title="Back button" />
+          </Link>
           <View>
-            <Text style={styles.title}>Player 1</Text>
-            <Text style={styles.title}>Player 2</Text>
+            <View>
+              <Text style={styles.title}>Player 1</Text>
+              <Text style={styles.title}>Player 2</Text>
+            </View>
+            <View>
+              <Button title="Switch grid" />
+              <Button title="FIRE !!!" />
+            </View>
           </View>
           <View>
-            <Button title="Switch grid" />
-            <Button title="FIRE !!!" />
-          </View>
-        </View>
-        <View>grid</View>
-      </View>
-
-      {players[playerTurn].board.map((rowArray, row) => {
-        return (
-          <View key={row} style={styles.row}>
-            {rowArray.map((colData, col) => {
-              if (row === 0 && col === 0) {
-                return null;
-              }
-
-              if (row === 0) {
-                return (
-                  <View
-                    key={`${row}-${col}`}
-                    style={{
-                      width: CELL_SIZE,
-                      aspectRatio: 1,
-                      backgroundColor: "white",
-                      alignItems: "flex-end",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text>{ALPHABET[col - 1]}</Text>
-                  </View>
-                );
-              }
-
-              if (col === 0) {
-                return (
-                  <View
-                    key={`${row}-${col}`}
-                    style={{
-                      width: CELL_SIZE,
-                      aspectRatio: 1,
-                      backgroundColor: "white",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text>{row}</Text>
-                  </View>
-                );
-              }
-
+            {" "}
+            {players[playerTurn].board.map((rowArray, row) => {
               return (
-                <Pressable
-                  key={`${row}-${col}`}
-                  onPress={() => updateGameBoard(row, col)}
-                  style={[
-                    styles.cell,
-                    colData === 1 && styles.cellX,
-                    colData === 2 && styles.cellDestroy,
-                  ]}
-                ></Pressable>
+                <View key={row} style={styles.row}>
+                  {rowArray.map((colData, col) => {
+                    if (row === 0 && col === 0) {
+                      return null;
+                    }
+
+                    if (row === 0) {
+                      return (
+                        <View
+                          key={`${row}-${col}`}
+                          style={{
+                            width: CELL_SIZE,
+                            aspectRatio: 1,
+                            backgroundColor: "white",
+                            alignItems: "flex-end",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Text>{ALPHABET[col - 1]}</Text>
+                        </View>
+                      );
+                    }
+
+                    if (col === 0) {
+                      return (
+                        <View
+                          key={`${row}-${col}`}
+                          style={{
+                            width: CELL_SIZE,
+                            aspectRatio: 1,
+                            backgroundColor: "white",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Text>{row}</Text>
+                        </View>
+                      );
+                    }
+
+                    return (
+                      <Pressable
+                        key={`${row}-${col}`}
+                        onPress={() => updateGameBoard(row, col)}
+                        style={[
+                          styles.cell,
+                          colData === 1 && styles.cellX,
+                          colData === 2 && styles.cellDestroy,
+                        ]}
+                      ></Pressable>
+                    );
+                  })}
+                </View>
               );
             })}
           </View>
-        );
-      })}
-    </View>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -102,6 +106,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  title: {
+    fontSize: 25,
+    fontWeight: "bold",
   },
   row: {
     flexDirection: "row",

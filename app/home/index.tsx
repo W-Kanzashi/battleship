@@ -2,32 +2,35 @@ import { Button, Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Home() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>BattleShip</Text>
-      <View
-        style={styles.separator}
-        lightColor="#eee"
-        darkColor="rgba(255,255,255,0.1)"
-      />
-      <Link href="/new-game" style={styles.pressableButton} asChild>
-        <Pressable>
-          <Text style={styles.buttonText}>New game</Text>
-        </Pressable>
-      </Link>
-      <Link href="/rules" style={styles.pressableButton} asChild>
-        <Pressable>
-          <Text style={styles.buttonText}>Rules</Text>
-        </Pressable>
-      </Link>
-      <Link href="/games-history" style={styles.pressableButton} asChild>
-        <Pressable>
-          <Text style={styles.buttonText}>Games history</Text>
-        </Pressable>
-      </Link>
-    </View>
+    <SafeAreaView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <Text style={styles.title}>BattleShip</Text>
+        <View
+          style={styles.separator}
+          lightColor="#eee"
+          darkColor="rgba(255,255,255,0.1)"
+        />
+        <Link href="/new-game" style={styles.pressableButton} asChild>
+          <Pressable>
+            <Text style={styles.buttonText}>New game</Text>
+          </Pressable>
+        </Link>
+        <Link href="/rules" style={styles.pressableButton} asChild>
+          <Pressable>
+            <Text style={styles.buttonText}>Rules</Text>
+          </Pressable>
+        </Link>
+        <Link href="/games-history" style={styles.pressableButton} asChild>
+          <Pressable>
+            <Text style={styles.buttonText}>Games history</Text>
+          </Pressable>
+        </Link>
+      </View>
+    </SafeAreaView>
   );
 }
 
