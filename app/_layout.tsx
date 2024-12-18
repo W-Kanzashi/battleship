@@ -54,6 +54,7 @@ function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   return (
+<<<<<<< HEAD
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GameBoardProvider>
         <Stack screenOptions={{ headerShown: false }}>
@@ -63,6 +64,14 @@ function RootLayoutNav() {
           <Stack.Screen name="game" options={{ headerShown: false }} />
         </Stack>
       </GameBoardProvider>
+=======
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <Stack>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="games-history" options={{ presentation: 'modal' }} />
+      </Stack>
+>>>>>>> 6d46260 (OUI)
     </ThemeProvider>
   );
 }

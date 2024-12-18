@@ -1,7 +1,13 @@
+<<<<<<< HEAD
 import { DatabaseManager } from '@/utils/database/database';
 import React, { useEffect, useState } from 'react';
 import { FlatList, View, Text, StyleSheet, Button } from 'react-native';
 
+=======
+import React, { useEffect, useState } from 'react';
+import { FlatList, View, Text, StyleSheet, Button } from 'react-native';
+import { DatabaseManager } from '../database/database'; // Assurez-vous d'avoir la bonne importation pour DatabaseManager
+>>>>>>> 6d46260 (OUI)
 
 const GameHistoryScreen = () => {
   const [gameHistory, setGameHistory] = useState<any[]>([]);

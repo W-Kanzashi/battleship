@@ -29,6 +29,7 @@
     },
     "plugins": [
       "expo-router",
+<<<<<<< HEAD
       [
         "expo-sqlite",
         {
@@ -43,6 +44,9 @@
           }
         }
       ]
+=======
+      "expo-sqlite"
+>>>>>>> 6d46260 (OUI)
     ],
     "experiments": {
       "typedRoutes": true
