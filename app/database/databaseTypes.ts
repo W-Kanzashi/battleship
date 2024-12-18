@@ -5,5 +5,5 @@ export interface Game {
     date: string; 
     winner: string;
     movesCount: number | null;
-  }
+  };
   
