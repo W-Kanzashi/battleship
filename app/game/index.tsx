@@ -1,24 +1,12 @@
-import { Button, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
-import { useGameBoard } from "@/utils/store/game";
 import { Link } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AntDesign } from "@expo/vector-icons";
-
-const CELL_SIZE = 35;
-
-const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+import { Board, BoardGrid, BoardInfo } from "@/components/game/board";
 
 export default function TabOneScreen() {
-  const { playerTurn, players, updateGameBoard } = useGameBoard();
-
-  console.log(">>> players", players, playerTurn);
-
-  if (!players) {
-    return null;
-  }
-
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -41,65 +29,18 @@ export default function TabOneScreen() {
             </Pressable>
           </View>
         </View>
-        <View>
-          {players[playerTurn].board.map((rowArray, row) => {
-            return (
-              <View key={row} style={styles.row}>
-                {rowArray.map((colData, col) => {
-                  if (row === 0 && col === 0) {
-                    return null;
-                  }
 
-                  if (row === 0) {
-                    return (
-                      <View
-                        key={`${row}-${col}`}
-                        style={{
-                          width: CELL_SIZE,
-                          aspectRatio: 1,
-                          backgroundColor: "white",
-                          alignItems: "flex-end",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Text>{ALPHABET[col - 1]}</Text>
-                      </View>
-                    );
-                  }
-
-                  if (col === 0) {
-                    return (
-                      <View
-                        key={`${row}-${col}`}
-                        style={{
-                          width: CELL_SIZE,
-                          aspectRatio: 1,
-                          backgroundColor: "white",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        <Text>{row}</Text>
-                      </View>
-                    );
-                  }
-
-                  return (
-                    <Pressable
-                      key={`${row}-${col}`}
-                      onPress={() => updateGameBoard(row, col)}
-                      style={[
-                        styles.cell,
-                        colData === 1 && styles.cellX,
-                        colData === 2 && styles.cellDestroy,
-                      ]}
-                    ></Pressable>
-                  );
-                })}
-              </View>
-            );
-          })}
-        </View>
+        <Board>
+          <BoardInfo type="alpha" />
+          <BoardGrid>
+            <BoardInfo
+              style={{
+                flexDirection: "column",
+                marginLeft: 0,
+              }}
+            />
+          </BoardGrid>
+        </Board>
       </View>
     </SafeAreaView>
   );
@@ -146,22 +87,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-evenly",
     paddingBottom: 10,
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  cell: {
-    width: CELL_SIZE,
-    aspectRatio: 1,
-    borderWidth: 1,
-    borderColor: "black",
-  },
-  cellX: {
-    backgroundColor: "yellow",
-  },
-  cellDestroy: {
-    backgroundColor: "red",
   },
 });

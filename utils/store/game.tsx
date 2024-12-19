@@ -10,9 +10,41 @@ type Ship = {
 type Player = {
   name: string;
   board: number[][];
+  /**
+   * A Record of ships placed on the board
+   *
+   * The form of a record is like this
+   * {
+   *   1: [
+   *     {
+   *       x: number;
+   *       y: number;
+   *       state: boolean;
+   *     }
+   *   ],
+   *   2: [
+   *     {
+   *       x: number;
+   *       y: number;
+   *       state: boolean;
+   *     }
+   *   ],
+   *   3: [
+   *     {
+   *       x: number;
+   *       y: number;
+   *       state: boolean;
+   *     }
+   *   ]
+   * }
+   */
   ships: Record<string, Ship[]>;
 };
 
+/**
+ * This is the ship data
+ * NOTE: Add more data to it if needed
+ */
 const shipArray = {
   1: {
     length: 5,
@@ -28,15 +60,32 @@ const shipArray = {
   },
 } as const;
 
-const gameBoardArray: number[][] = Array(11)
+const gameBoardArray: number[][] = Array(10)
   .fill(0)
-  .map((_, index) => Array(11).fill(index === 3 ? 1 : 0));
+  .map(() => Array(10).fill(0));
 
 const GameContext = createContext<{
+  /**
+   * The players object contains the player data
+   * like the name, the current boar and all ships placed on the board
+   */
   players: Record<string, Player> | null;
+  /**
+   * Save the current player turn
+   */
   playerTurn: number;
+  /**
+   * Initialize the game board with minimal data
+   */
   initializeGame: (player1: Player["name"], player2: Player["name"]) => void;
-  placeShip: (x: number, y: number) => void;
+  placeShip: (
+    name: 1 | 2 | 3 | 4,
+    start: {
+      x: number;
+      y: number;
+    },
+    direction: "horizontal" | "vertical",
+  ) => void;
   updateGameBoard: (x: number, y: number) => void;
   changePlayerTurn: () => void;
 } | null>(null);
@@ -48,10 +97,13 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     null,
   );
 
+  // WARN: Delete this if the implementation of initializeGame is done
+  // This is a temporary implementation
   useEffect(() => {
     if (!gameBoard) {
       initializeGame("Player 1", "Player 2");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function initializeGame(player1: Player["name"], player2: Player["name"]) {
@@ -73,16 +125,17 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     return;
   }
 
+  /**
+   * Place a ship on the board
+   * The ship will be place on the board with ether horizontal or vertical direction
+   */
   function placeShip(
     name: 1 | 2 | 3 | 4,
     start: {
       x: number;
       y: number;
     },
-    end: {
-      x: number;
-      y: number;
-    },
+    direction: "horizontal" | "vertical" = "horizontal",
   ) {
     if (!gameBoard) {
       return;
@@ -92,9 +145,24 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       ...gameBoard[playerTurn],
     };
 
-    // NOTE: Place all ships on the board
+    // NOTE: Place a new ship on the board without the coordinates
+    playerData.ships = {
+      ...playerData.ships,
+      [name]: [],
+    };
+
+    // NOTE: Place the ship coordinates on the board
     for (let i = 0; i < shipArray[name].length; i++) {
-      playerData.ships[name][i] = { x: start.x, y: start.y, state: true };
+      // NOTE: Check the direction of the ship
+      if (direction === "horizontal") {
+        playerData.ships[name][i] = { x: start.x, y: start.y + i, state: true };
+        playerData.board[start.x][start.y + i] = 1;
+
+        continue;
+      }
+
+      playerData.ships[name][i] = { x: start.x + i, y: start.y, state: true };
+      playerData.board[start.x + i][start.y] = 1;
     }
 
     setGameBoard({
@@ -117,16 +185,23 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     if (playerData.board[x][y] === 1) {
       playerData.board[x][y] = 2;
 
-      const ships = Object.entries(playerData.ships).find(
-        ([_key, value]) => value.x === x && value.y === y,
-      );
+      const ships = Object.entries(playerData.ships)
+        .find(
+          ([_key, value]) =>
+            value.find((p) => p.x === x) && value.find((p) => p.y === y),
+        )?.[1]
+        .find((p) => p.x === x && p.y === y);
 
       if (ships) {
-        ships[1].state = false;
-      }
+        ships.state = false;
 
-      if (ships[1].state === false) {
-        router.push("/game/end");
+        if (
+          Object.entries(playerData.ships).every(([_, p]) =>
+            p.every((k) => k.state === false),
+          )
+        ) {
+          router.push("/game/end");
+        }
       }
     }
 
@@ -138,6 +213,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  // TODO: Make this function dynamic to be able to play with different number of players
   const changePlayerTurn = () => {
     setPlayerTurn(playerTurn === 0 ? 1 : 0);
   };
