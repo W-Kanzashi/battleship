@@ -7,6 +7,8 @@ import { AntDesign } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+const boatArray: number[][] = Array(2).fill(0);
+
 export default function BoatPlacement() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -21,7 +23,15 @@ export default function BoatPlacement() {
           <Pressable style={styles.pressableButton}>
             <Text style={styles.buttonText}>Confirm placement</Text>
           </Pressable>
-          <Image></Image>
+          <View style={styles.boatDisplay}>
+            {boatArray.map((_, index) => {
+              return (
+                <View key={index} style={styles.cell}>
+                  <Text></Text>
+                </View>
+              );
+            })}
+          </View>
         </View>
         <Image></Image>
       </View>
@@ -36,7 +46,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   title: {
-    paddingVertical: 30,
+    paddingVertical: 20,
     fontSize: 25,
     fontWeight: "bold",
     textAlign: "center",
@@ -65,5 +75,15 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#ffffff",
     fontSize: 15,
+  },
+  boatDisplay: {
+    flex: 1,
+    flexDirection: "row",
+  },
+  cell: {
+    width: 30,
+    aspectRatio: 1,
+    borderWidth: 1,
+    borderColor: "black",
   },
 });
