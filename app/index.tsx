@@ -1,4 +1,4 @@
-import { Button, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
@@ -14,16 +14,19 @@ export default function Home() {
           lightColor="#eee"
           darkColor="rgba(255,255,255,0.1)"
         />
+
         <Link href="/new-game" style={styles.pressableButton} asChild>
           <Pressable>
             <Text style={styles.buttonText}>New game</Text>
           </Pressable>
         </Link>
+
         <Link href="/rules" style={styles.pressableButton} asChild>
           <Pressable>
             <Text style={styles.buttonText}>Rules</Text>
           </Pressable>
         </Link>
+
         <Link href="/games-history" style={styles.pressableButton} asChild>
           <Pressable>
             <Text style={styles.buttonText}>Games history</Text>
@@ -48,7 +51,7 @@ const styles = StyleSheet.create({
   separator: {
     marginVertical: 30,
     height: 1,
-    width: "80%",
+    width: "100%",
   },
   pressableButton: {
     backgroundColor: "#3e66bd",

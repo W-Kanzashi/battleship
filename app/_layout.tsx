@@ -21,7 +21,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
+  initialRouteName: "/",
 };
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -59,10 +59,10 @@ function RootLayoutNav() {
       <GameBoardProvider>
         <SafeAreaProvider>
           <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="home" options={{ headerShown: false }} />
-            <Stack.Screen name="new-game" options={{ headerShown: false }} />
-            <Stack.Screen name="rules" options={{ headerShown: false }} />
-            <Stack.Screen name="game" options={{ headerShown: false }} />
+            <Stack.Screen name="index" />
+            <Stack.Screen name="new-game" />
+            <Stack.Screen name="rules" />
+            <Stack.Screen name="game" />
           </Stack>
         </SafeAreaProvider>
       </GameBoardProvider>

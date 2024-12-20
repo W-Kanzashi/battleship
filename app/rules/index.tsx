@@ -1,4 +1,4 @@
-import { Button, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
@@ -9,11 +9,12 @@ export default function Rules() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Link href="/home" style={styles.backButton} asChild>
+        <Link href="/" style={styles.backButton} asChild>
           <Pressable>
             <AntDesign name="arrowleft" size={24} color="white" />
           </Pressable>
         </Link>
+
         <Text style={styles.title}>Rules</Text>
         <Text style={styles.rules}>
           How do you play Battleship? The game is pretty straightforward. Each

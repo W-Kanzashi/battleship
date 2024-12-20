@@ -130,7 +130,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
    * The ship will be place on the board with ether horizontal or vertical direction
    */
   function placeShip(
-    name: 1 | 2 | 3 | 4,
+    name: keyof typeof shipArray,
     start: {
       x: number;
       y: number;
