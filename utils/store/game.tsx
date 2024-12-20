@@ -1,5 +1,6 @@
 import { useState, createContext, useContext, useEffect } from "react";
 import { useRouter } from "expo-router";
+import { db } from "@/utils/database/database";
 
 type Ship = {
   x: number;
@@ -60,10 +61,6 @@ const shipArray = {
   },
 } as const;
 
-const gameBoardArray: number[][] = Array(10)
-  .fill(0)
-  .map(() => Array(10).fill(0));
-
 const GameContext = createContext<{
   /**
    * The players object contains the player data
@@ -77,9 +74,9 @@ const GameContext = createContext<{
   /**
    * Initialize the game board with minimal data
    */
-  initializeGame: (player1: Player["name"], player2: Player["name"]) => void;
+  initializeGame: (players: Player["name"][], size?: number) => void;
   placeShip: (
-    name: 1 | 2 | 3 | 4,
+    name: keyof typeof shipArray,
     start: {
       x: number;
       y: number;
@@ -88,6 +85,7 @@ const GameContext = createContext<{
   ) => void;
   updateGameBoard: (x: number, y: number) => void;
   changePlayerTurn: () => void;
+  getGameState: () => void;
 } | null>(null);
 
 function GameBoardProvider({ children }: { children: React.ReactNode }) {
@@ -96,30 +94,50 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
   const [gameBoard, setGameBoard] = useState<Record<string, Player> | null>(
     null,
   );
+  const [gameState, setGameState] = useState<
+    {
+      player: number;
+      move: {
+        x: number;
+        y: number;
+      };
+      isShip: boolean;
+    }[]
+  >([]);
 
   // WARN: Delete this if the implementation of initializeGame is done
   // This is a temporary implementation
   useEffect(() => {
     if (!gameBoard) {
-      initializeGame("Player 1", "Player 2");
+      initializeGame(["Player 1", "Player 2"]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function initializeGame(player1: Player["name"], player2: Player["name"]) {
+  function initializeGame(players: Player["name"][], size = 10) {
+    const gameBoardArray: number[][] = Array(size)
+      .fill(0)
+      .map(() => Array(size).fill(0));
+
+    let index = 0;
+
+    const generateGame = players.reduce(
+      (acc, player) => {
+        acc[index] = {
+          name: player,
+          board: gameBoardArray,
+          ships: {},
+        };
+
+        index++;
+
+        return acc;
+      },
+      {} as Record<string, Player>,
+    );
+
     if (!gameBoard) {
-      setGameBoard({
-        [playerTurn]: {
-          name: playerTurn === 0 ? player1 : player2,
-          board: gameBoardArray,
-          ships: {},
-        },
-        [playerTurn === 0 ? 1 : 0]: {
-          name: playerTurn === 0 ? player2 : player1,
-          board: gameBoardArray,
-          ships: {},
-        },
-      });
+      setGameBoard(generateGame);
     }
 
     return;
@@ -155,7 +173,11 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     for (let i = 0; i < shipArray[name].length; i++) {
       // NOTE: Check the direction of the ship
       if (direction === "horizontal") {
-        playerData.ships[name][i] = { x: start.x, y: start.y + i, state: true };
+        playerData.ships[name][i] = {
+          x: start.x,
+          y: start.y + i,
+          state: true,
+        };
         playerData.board[start.x][start.y + i] = 1;
 
         continue;
@@ -173,6 +195,18 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
+  /**
+   * Update the game board
+   * The game board is a 2D array
+   * The first dimension is the row
+   * The second dimension is the column
+   *
+   * The value of the array is the state of the cell
+   * 0 - Empty
+   * 1 - Ship
+   * 2 - Destroyed
+   * 3 - Destroyed and ship
+   */
   const updateGameBoard = (x: number, y: number) => {
     if (!gameBoard) {
       return;
@@ -182,8 +216,14 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       ...gameBoard[playerTurn],
     };
 
-    if (playerData.board[x][y] === 1) {
-      playerData.board[x][y] = 2;
+    let isShip = false;
+
+    if (playerData.board[x][y] === 0) {
+      playerData.board[x][y] = 1;
+    }
+
+    if (playerData.board[x][y] === 2) {
+      playerData.board[x][y] = 3;
 
       const ships = Object.entries(playerData.ships)
         .find(
@@ -194,13 +234,14 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
 
       if (ships) {
         ships.state = false;
+        isShip = true;
 
         if (
           Object.entries(playerData.ships).every(([_, p]) =>
             p.every((k) => k.state === false),
           )
         ) {
-          router.push("/game/end");
+          router.push("/game/game-ending");
         }
       }
     }
@@ -211,6 +252,18 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         ...playerData,
       },
     });
+
+    setGameState([
+      ...gameState,
+      {
+        player: playerTurn,
+        move: {
+          x: x,
+          y: y,
+        },
+        isShip: isShip,
+      },
+    ]);
   };
 
   // TODO: Make this function dynamic to be able to play with different number of players

@@ -10,7 +10,7 @@ export default function TabOneScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Link href="/home" style={styles.backButton} asChild>
+        <Link href="/" style={styles.backButton} asChild>
           <Pressable>
             <AntDesign name="arrowleft" size={24} color="white" />
           </Pressable>

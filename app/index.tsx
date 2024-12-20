@@ -21,6 +21,11 @@ export default function Home() {
           </Pressable>
         </Link>
 
+        <Link href="/game" style={styles.pressableButton} asChild>
+          <Pressable>
+            <Text style={styles.buttonText}>Rules</Text>
+          </Pressable>
+        </Link>
         <Link href="/rules" style={styles.pressableButton} asChild>
           <Pressable>
             <Text style={styles.buttonText}>Rules</Text>

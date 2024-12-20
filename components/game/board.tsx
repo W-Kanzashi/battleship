@@ -11,6 +11,7 @@ function Board(props: { children: ReactNode }) {
 
 function BoardGrid(props: { children: ReactNode }) {
   const { playerTurn, players } = useGameBoard();
+  console.log(players?.[playerTurn].board, playerTurn);
 
   if (!players) {
     throw new Error(

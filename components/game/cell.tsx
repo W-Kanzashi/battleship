@@ -15,8 +15,8 @@ export function Cell(props: CellProps) {
       onPress={() => updateGameBoard(props.row, props.col)}
       style={[
         styles.cell,
-        props.colData === 1 && styles.cellShip,
-        props.colData === 2 && styles.cellDestroy,
+        props.colData === 1 && styles.cellLaunch,
+        props.colData === 3 && styles.cellDestroy,
       ]}
     ></Pressable>
   );
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "black",
   },
-  cellShip: {
+  cellLaunch: {
     backgroundColor: "yellow",
   },
   cellDestroy: {

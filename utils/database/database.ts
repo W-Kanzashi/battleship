@@ -1,17 +1,15 @@
 import * as SQLite from "expo-sqlite";
 
-export class DatabaseManager {
-  private db;
+class DatabaseManager {
+  private db: SQLite.SQLiteDatabase;
 
   constructor() {
-    this.db = SQLite.openDatabaseAsync("battle_game.db");
+    this.db = SQLite.openDatabaseSync("battle_game.db");
     this.init();
   }
 
-  private async init() {
-    await (
-      await this.db
-    ).execAsync(`
+  private init() {
+    this.db.execSync(`
       PRAGMA journal_mode = WAL;
       CREATE TABLE IF NOT EXISTS game_history (
         id INTEGER PRIMARY KEY NOT NULL,
@@ -20,14 +18,20 @@ export class DatabaseManager {
         date TEXT NOT NULL,
         winner TEXT NOT NULL,
         moves INTEGER
+        game_state INTEGER
+      );
+
+      CREATE TABLE IF NOT EXISTS game_state (
+        id INTEGER PRIMARY KEY NOT NULL,
+        game_id INTEGER NOT NULL,
+        data TEXT NOT NULL
       );
     `);
   }
 
-  public async getGameHistory() {
-    const result = await (
-      await this.db
-    ).getAllAsync("SELECT * FROM game_history");
+  public getGameHistory() {
+    const result = this.db.getAllSync("SELECT * FROM game_history");
+
     return result.map((row: any) => ({
       id: row.id,
       player1: row.player1,
@@ -38,16 +42,15 @@ export class DatabaseManager {
     }));
   }
 
-  public async addGame(
+  public addGame(
     player1: string,
     player2: string,
     winner: string,
     moves: number,
   ) {
     const date = new Date().toISOString();
-    const result = await (
-      await this.db
-    ).runAsync(
+
+    const result = this.db.runSync(
       "INSERT INTO game_history (player1, player2, date, winner, moves) VALUES (?, ?, ?, ?, ?)",
       player1,
       player2,
@@ -57,4 +60,14 @@ export class DatabaseManager {
     );
     return result.lastInsertRowId;
   }
+
+  public saveGameState(gameId: number, data: string) {
+    this.db.runSync(
+      "INSERT INTO game_state (game_id, data) VALUES (?, ?)",
+      gameId,
+      data,
+    );
+  }
 }
+
+export const db = new DatabaseManager();
