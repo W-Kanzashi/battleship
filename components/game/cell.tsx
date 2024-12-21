@@ -8,11 +8,14 @@ type CellProps = {
 };
 
 export function Cell(props: CellProps) {
-  const { updateGameBoard } = useGameBoard();
+  const { updateGameBoard, updateBoatPlacement } = useGameBoard();
 
   return (
     <Pressable
-      onPress={() => updateGameBoard(props.row, props.col)}
+      onPress={() => {
+        updateGameBoard(props.row, props.col);
+        updateBoatPlacement(props.row, props.col);
+      }}
       style={[
         styles.cell,
         props.colData === 1 && styles.cellLaunch,

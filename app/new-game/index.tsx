@@ -1,14 +1,30 @@
 import { Button, Pressable, StyleSheet, TextInput } from "react-native";
 
 import { Text, View } from "@/components/Themed";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import React from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useGameBoard } from "@/utils/store/game";
+import { error } from "console";
 
 export default function NewGame() {
   const [playeOneName, onChangePlayerOneName] = React.useState("");
   const [playeTwoName, onChangePlayerTwoName] = React.useState("");
+  const [error, setError] = React.useState("");
+  const router = useRouter();
+
+  const { initializeGame } = useGameBoard();
+
+  function initGame() {
+    if (playeOneName?.trim() && playeTwoName?.trim()) {
+      initializeGame([playeOneName, playeTwoName]);
+      router.push("/new-game/boat-placement");
+      setError("");
+    } else {
+      setError("Please enter two valid names");
+    }
+  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -35,16 +51,10 @@ export default function NewGame() {
           onChangeText={onChangePlayerTwoName}
           placeholder="Player 2 name"
         />
-
-        <Link
-          href="/new-game/boat-placement"
-          style={styles.pressableButton}
-          asChild
-        >
-          <Pressable>
-            <Text style={styles.buttonText}>Start boats placement</Text>
-          </Pressable>
-        </Link>
+        <Text>{error}</Text>
+        <Pressable style={styles.pressableButton} onPress={initGame}>
+          <Text style={styles.buttonText}>Start boats placement</Text>
+        </Pressable>
       </View>
     </SafeAreaView>
   );

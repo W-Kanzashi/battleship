@@ -8,6 +8,11 @@ type Ship = {
   state: boolean;
 };
 
+type ShipSetup = {
+  length: number;
+  direction: "horizontal" | "vertical";
+};
+
 type Player = {
   name: string;
   board: number[][];
@@ -84,8 +89,14 @@ const GameContext = createContext<{
     direction: "horizontal" | "vertical",
   ) => void;
   updateGameBoard: (x: number, y: number) => void;
+  setupBoatPlacement: (
+    length: number,
+    direction: "horizontal" | "vertical",
+  ) => void;
+  updateBoatPlacement: (x: number, y: number) => void;
   changePlayerTurn: () => void;
   getGameState: () => void;
+  setBoatPlacement: (state: boolean) => void;
 } | null>(null);
 
 function GameBoardProvider({ children }: { children: React.ReactNode }) {
@@ -104,15 +115,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       isShip: boolean;
     }[]
   >([]);
-
-  // WARN: Delete this if the implementation of initializeGame is done
-  // This is a temporary implementation
-  useEffect(() => {
-    if (!gameBoard) {
-      initializeGame(["Player 1", "Player 2"]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const [boatPlacement, setBoatPlacement] = useState(true);
+  const [precedentBoat, setPrecedentBoat] = useState<Ship | null>(null);
+  const [boatSetupParameters, setBoatSetupParameters] =
+    useState<ShipSetup | null>({ length: 2, direction: "horizontal" });
 
   function initializeGame(players: Player["name"][], size = 10) {
     const gameBoardArray: number[][] = Array(size)
@@ -136,9 +142,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       {} as Record<string, Player>,
     );
 
-    if (!gameBoard) {
-      setGameBoard(generateGame);
-    }
+    setGameBoard(generateGame);
 
     return;
   }
@@ -195,6 +199,52 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
+  const setupBoatPlacement = (
+    length: number = 2,
+    direction: "horizontal" | "vertical" = "horizontal",
+  ) => {
+    setBoatSetupParameters({ length, direction });
+  };
+
+  const updateBoatPlacement = (x: number, y: number) => {
+    if (!boatPlacement) {
+      return;
+    }
+
+    if (!gameBoard) {
+      return;
+    }
+
+    const playerData = {
+      ...gameBoard[playerTurn],
+    };
+
+    for (let i = 0; i < boatSetupParameters!.length; i++) {
+      // NOTE: Check the direction of the ship
+      if (boatSetupParameters?.direction === "horizontal") {
+        if (playerData.board[x][y] === 0) {
+          playerData.board[x][y + i] = 1;
+        }
+      } else {
+        if (playerData.board[x][y] === 0) {
+          playerData.board[x + i][y] = 1;
+        }
+      }
+    }
+    if (precedentBoat) {
+      playerData.board[precedentBoat.x][precedentBoat.y] = 0;
+    }
+
+    setGameBoard({
+      ...gameBoard,
+      [playerTurn]: {
+        ...playerData,
+      },
+    });
+
+    setPrecedentBoat({ x: x, y: y, state: false });
+  };
+
   /**
    * Update the game board
    * The game board is a 2D array
@@ -208,6 +258,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
    * 3 - Destroyed and ship
    */
   const updateGameBoard = (x: number, y: number) => {
+    if (boatPlacement) {
+      return;
+    }
+
     if (!gameBoard) {
       return;
     }
@@ -279,7 +333,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         placeShip,
         initializeGame,
         updateGameBoard,
+        updateBoatPlacement,
+        setupBoatPlacement,
         changePlayerTurn,
+        setBoatPlacement,
       }}
     >
       {children}
