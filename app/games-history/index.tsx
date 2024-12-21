@@ -7,33 +7,33 @@ const GameHistoryScreen = () => {
   const {} = useGameBoard();
   const [loading, setLoading] = useState<boolean>(true);
 
-  useEffect(() => {
-    const fetchGameHistory = async () => {
-      try {
-        const history = db.getGameHistory();
-        setGameHistory(history);
-      } catch (error) {
-        console.error("Error fetching game history:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchGameHistory = async () => {
+  //     try {
+  //       const history = db.getGameHistory();
+  //       setGameHistory(history);
+  //     } catch (error) {
+  //       console.error("Error fetching game history:", error);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchGameHistory();
-  }, []); // Ce useEffect se lance une fois lors du montage du composant
+  //   fetchGameHistory();
+  // }, []); // Ce useEffect se lance une fois lors du montage du composant
 
-  // Si les données sont en cours de chargement
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <Text>Chargement...</Text>
-      </View>
-    );
-  }
+  // // Si les données sont en cours de chargement
+  // if (loading) {
+  //   return (
+  //     <View style={styles.center}>
+  //       <Text>Chargement...</Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
-      <FlatList
+      {/* <FlatList
         data={gameHistory}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
@@ -46,7 +46,7 @@ const GameHistoryScreen = () => {
             <Text>Nombre de coups: {item.movesCount}</Text>
           </View>
         )}
-      />
+      /> */}
     </View>
   );
 };

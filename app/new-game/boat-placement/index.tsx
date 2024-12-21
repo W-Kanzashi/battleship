@@ -16,8 +16,13 @@ type ShipSetup = {
 const boatsArray = [2, 3, 4, 5];
 
 export default function BoatPlacement() {
-  const { changePlayerTurn, players, playerTurn, setupBoatPlacement } =
-    useGameBoard();
+  const {
+    changePlayerTurn,
+    players,
+    playerTurn,
+    setBoatLength,
+    turnBoatplacement,
+  } = useGameBoard();
   const [currentShip, setCurrentShip] = useState<ShipSetup>({
     length: boatsArray[0],
     direction: "horizontal",
@@ -26,17 +31,17 @@ export default function BoatPlacement() {
   const boatDisplay: number[][] = Array(currentShip.length).fill(0);
   const [currentBoatCoordinates, setCurrentBoatCoordinates] = useState(0);
 
-  // useEffect(/*setupBoatPlacement */);
-
   function placeBoat() {
-    // placeShip
+    // validateShipPlacement
     if (currentShip.length < 5) {
       setCurrentShip({
         length: currentShip.length + 1,
         direction: currentShip.direction,
       });
+      setBoatLength(currentShip.length);
     } else {
       setCurrentShip({ length: boatsArray[0], direction: "horizontal" });
+      setBoatLength(currentShip.length);
       changePlayerTurn(); // à check
       // if (0 playerturn is ???) {
       // }
@@ -45,10 +50,10 @@ export default function BoatPlacement() {
 
   function turnBoat() {
     if (currentShip.direction === "horizontal") {
-      setupBoatPlacement(currentShip.length, "vertical");
+      turnBoatplacement("vertical");
       setCurrentShip({ length: currentShip.length, direction: "vertical" });
     } else {
-      setupBoatPlacement(currentShip.length, "horizontal");
+      turnBoatplacement("horizontal");
       setCurrentShip({ length: currentShip.length, direction: "horizontal" });
     }
   }
