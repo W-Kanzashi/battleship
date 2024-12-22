@@ -1,6 +1,5 @@
 import { useState, createContext, useContext, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { db } from "@/utils/database/database";
 
 type Ship = {
   x: number;
@@ -40,6 +39,15 @@ type Player = {
    * }
    */
   ships: Record<string, Ship[]>;
+};
+
+type GameState = {
+  player: number;
+  move: {
+    x: number;
+    y: number;
+  };
+  isShip: boolean;
 };
 
 /**
@@ -83,27 +91,20 @@ const GameContext = createContext<{
     },
     direction: "horizontal" | "vertical",
   ) => void;
-  updateGameBoard: (x: number, y: number) => void;
+  updateGameBoard: (x: number, y: number, isPlacedShip?: boolean) => void;
   changePlayerTurn: () => void;
-  getGameState: () => void;
+  getGameState: () => GameState[];
+  handleReplayMode: ({ mode }: { mode: "game" | "replay" }) => void;
 } | null>(null);
 
 function GameBoardProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [isReplay, setIsReplay] = useState<boolean>(false);
   const [playerTurn, setPlayerTurn] = useState<number>(0);
   const [gameBoard, setGameBoard] = useState<Record<string, Player> | null>(
     null,
   );
-  const [gameState, setGameState] = useState<
-    {
-      player: number;
-      move: {
-        x: number;
-        y: number;
-      };
-      isShip: boolean;
-    }[]
-  >([]);
+  const [gameState, setGameState] = useState<GameState[]>([]);
 
   // WARN: Delete this if the implementation of initializeGame is done
   // This is a temporary implementation
@@ -113,6 +114,12 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function handleReplayMode({ mode }: { mode: "game" | "replay" }) {
+    if (mode === "replay") {
+      setIsReplay(true);
+    }
+  }
 
   function initializeGame(players: Player["name"][], size = 10) {
     const gameBoardArray: number[][] = Array(size)
@@ -136,9 +143,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       {} as Record<string, Player>,
     );
 
-    if (!gameBoard) {
-      setGameBoard(generateGame);
-    }
+    setGameBoard(generateGame);
 
     return;
   }
@@ -203,11 +208,19 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
    *
    * The value of the array is the state of the cell
    * 0 - Empty
-   * 1 - Ship
-   * 2 - Destroyed
+   * 1 - Missile lauched
+   * 2 - Ship
    * 3 - Destroyed and ship
    */
-  const updateGameBoard = (x: number, y: number) => {
+  const updateGameBoard = (
+    x: number,
+    y: number,
+    /**
+     * This is for the replay mode
+     * it set if the selected cell is a ship
+     */
+    isPlacedShip: boolean = false,
+  ) => {
     if (!gameBoard) {
       return;
     }
@@ -246,6 +259,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    if (isReplay && isPlacedShip) {
+      playerData.board[x][y] = 3;
+    }
+
     setGameBoard({
       ...gameBoard,
       [playerTurn]: {
@@ -271,6 +288,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     setPlayerTurn(playerTurn === 0 ? 1 : 0);
   };
 
+  const getGameState = () => {
+    return gameState;
+  };
+
   return (
     <GameContext.Provider
       value={{
@@ -278,8 +299,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         playerTurn: 0,
         placeShip,
         initializeGame,
+        getGameState,
         updateGameBoard,
         changePlayerTurn,
+        handleReplayMode,
       }}
     >
       {children}

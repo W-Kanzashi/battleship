@@ -23,7 +23,6 @@ class DatabaseManager {
 
       CREATE TABLE IF NOT EXISTS game_state (
         id INTEGER PRIMARY KEY NOT NULL,
-        game_id INTEGER NOT NULL,
         data TEXT NOT NULL
       );
     `);
@@ -60,14 +59,48 @@ class DatabaseManager {
     );
     return result.lastInsertRowId;
   }
+}
 
-  public saveGameState(gameId: number, data: string) {
-    this.db.runSync(
-      "INSERT INTO game_state (game_id, data) VALUES (?, ?)",
-      gameId,
-      data,
-    );
+export async function migrateDbIfNeeded(db: SQLite.SQLiteDatabase) {
+  const DATABASE_VERSION = 1;
+
+  let database = await db.getFirstAsync<{
+    user_version: number;
+  }>("PRAGMA user_version");
+
+  if (!database) {
+    throw new Error("Database not initialized");
   }
+
+  if (database.user_version >= DATABASE_VERSION) {
+    return;
+  }
+
+  if (database.user_version === 0) {
+    await db.execAsync(`
+      PRAGMA journal_mode = 'wal';
+
+      CREATE TABLE IF NOT EXISTS game_history (
+        id INTEGER PRIMARY KEY NOT NULL,
+        player1 TEXT NOT NULL,
+        player2 TEXT NOT NULL,
+        date TEXT NOT NULL,
+        winner TEXT NOT NULL,
+        moves INTEGER
+        game_state INTEGER
+      );
+
+      CREATE TABLE IF NOT EXISTS game_state (
+        id INTEGER PRIMARY KEY NOT NULL,
+        game_id INTEGER NOT NULL,
+        data TEXT NOT NULL
+      );
+    `);
+
+    database.user_version = 1;
+  }
+
+  await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
 }
 
 export const db = new DatabaseManager();
