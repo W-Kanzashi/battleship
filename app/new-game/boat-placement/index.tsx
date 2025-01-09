@@ -1,8 +1,8 @@
-import { Button, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Board, BoardGrid, BoardInfo } from "@/components/game/board";
@@ -20,6 +20,7 @@ export default function BoatPlacement() {
     changePlayerTurn,
     players,
     playerTurn,
+    validateShipPlacement,
     setBoatLength,
     turnBoatplacement,
   } = useGameBoard();
@@ -32,18 +33,20 @@ export default function BoatPlacement() {
   const [currentBoatCoordinates, setCurrentBoatCoordinates] = useState(0);
 
   function placeBoat() {
-    // validateShipPlacement
+    validateShipPlacement();
+    console.log("current ship : " + currentShip.length);
     if (currentShip.length < 5) {
+      setBoatLength(currentShip.length + 1);
       setCurrentShip({
         length: currentShip.length + 1,
         direction: currentShip.direction,
       });
-      setBoatLength(currentShip.length);
     } else {
       setCurrentShip({ length: boatsArray[0], direction: "horizontal" });
-      setBoatLength(currentShip.length);
-      changePlayerTurn(); // à check
+      setBoatLength(boatsArray[0]);
+      changePlayerTurn();
       // if (0 playerturn is ???) {
+      // when last player have finished, setBoatPlacement to false
       // }
     }
   }

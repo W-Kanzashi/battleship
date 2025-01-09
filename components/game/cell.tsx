@@ -19,6 +19,7 @@ export function Cell(props: CellProps) {
       style={[
         styles.cell,
         props.colData === 1 && styles.cellLaunch,
+        props.colData === -1 && styles.cellPrePlaced,
         props.colData === 3 && styles.cellDestroy,
       ]}
     ></Pressable>
@@ -37,5 +38,8 @@ const styles = StyleSheet.create({
   },
   cellDestroy: {
     backgroundColor: "red",
+  },
+  cellPrePlaced: {
+    backgroundColor: "green",
   },
 });

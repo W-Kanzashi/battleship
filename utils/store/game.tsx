@@ -96,6 +96,7 @@ const GameContext = createContext<{
     direction: "horizontal" | "vertical",
   ) => void;
   updateGameBoard: (x: number, y: number) => void;
+  validateShipPlacement: () => void;
   setBoatLength: (length: number) => void;
   turnBoatplacement: (direction: "horizontal" | "vertical") => void;
   updateBoatPlacement: (x: number, y: number) => void;
@@ -128,6 +129,9 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     useState<ShipSetup | null>({ length: 2, direction: "horizontal" });
 
   function initializeGame(players: Player["name"][], size = 10) {
+    setPrecedentBoat(null);
+    setBoatSetupParameters({ length: 2, direction: "horizontal" });
+
     const gameBoardArray: number[][] = Array(size)
       .fill(0)
       .map(() => Array(size).fill(0));
@@ -206,8 +210,66 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     });
   }
 
-  const validateShipPlacement = () => {};
+  //check the cells around the selected cell to avoid close placement
+  function checkCellValidity(x: number, y: number): boolean {
+    if (!boatPlacement) {
+      return false;
+    }
 
+    if (!gameBoard) {
+      return false;
+    }
+    const playerData = {
+      ...gameBoard[playerTurn],
+    };
+
+    if (x > 9 || y > 9) {
+      return false;
+    }
+
+    if (
+      playerData.board[x - 1 < 0 ? x : x - 1][y] === 1 ||
+      playerData.board[x][y - 1] === 1 ||
+      playerData.board[x + 1 > 9 ? x : x + 1][y] === 1 ||
+      playerData.board[x][y + 1] === 1
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  const validateShipPlacement = () => {
+    if (!boatPlacement) {
+      return false;
+    }
+
+    if (!gameBoard) {
+      return false;
+    }
+    const playerData = {
+      ...gameBoard[playerTurn],
+    };
+
+    //use the precedent placed boat and convert all his cells values from -1 to 1
+    if (precedentBoat) {
+      for (let i = 0; i < precedentBoat.length; i++) {
+        // NOTE: Check the direction of the ship
+        if (precedentBoat.direction === "horizontal") {
+          if (playerData.board[precedentBoat.x][precedentBoat.y + i] === -1) {
+            playerData.board[precedentBoat.x][precedentBoat.y + i] = 1;
+          }
+        } else {
+          if (playerData.board[precedentBoat.x + i][precedentBoat.y] === -1) {
+            playerData.board[precedentBoat.x + i][precedentBoat.y] = 1;
+          }
+        }
+      }
+    }
+    setPrecedentBoat(null);
+  };
+
+  //configure the current ship length
   const setBoatLength = (length: number) => {
     setBoatSetupParameters({
       length: length,
@@ -229,18 +291,47 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       direction: direction,
     });
 
+    //check if all of the ship's cells are in a valid placement before rotating the ship
     if (precedentBoat) {
+      for (let i = 1; i < precedentBoat.length; i++) {
+        if (precedentBoat.direction === "horizontal") {
+          if (playerData.board[precedentBoat.x][precedentBoat.y + i] === -1) {
+            if (!checkCellValidity(precedentBoat.x + i, precedentBoat.y)) {
+              console.log("turn error");
+              return;
+            }
+          }
+        } else {
+          if (playerData.board[precedentBoat.x + i][precedentBoat.y] === -1) {
+            if (!checkCellValidity(precedentBoat.x, precedentBoat.y + i)) {
+              console.log("turn error");
+              return;
+            }
+          }
+        }
+      }
+      //rotate the ship cell by cell
       for (let i = 1; i < precedentBoat.length; i++) {
         // NOTE: Check the direction of the ship
         if (precedentBoat.direction === "horizontal") {
-          if (playerData.board[precedentBoat.x][precedentBoat.y + i] === 1) {
-            playerData.board[precedentBoat.x][precedentBoat.y + i] = 0;
-            playerData.board[precedentBoat.x + i][precedentBoat.y] = 1;
+          if (playerData.board[precedentBoat.x][precedentBoat.y + i] === -1) {
+            if (checkCellValidity(precedentBoat.x + i, precedentBoat.y)) {
+              playerData.board[precedentBoat.x][precedentBoat.y + i] = 0;
+              playerData.board[precedentBoat.x + i][precedentBoat.y] = -1;
+            }
+          } else {
+            console.log("turn error");
+            return;
           }
         } else {
-          if (playerData.board[precedentBoat.x + i][precedentBoat.y] === 1) {
-            playerData.board[precedentBoat.x + i][precedentBoat.y] = 0;
-            playerData.board[precedentBoat.x][precedentBoat.y + i] = 1;
+          if (playerData.board[precedentBoat.x + i][precedentBoat.y] === -1) {
+            if (checkCellValidity(precedentBoat.x, precedentBoat.y + i)) {
+              playerData.board[precedentBoat.x + i][precedentBoat.y] = 0;
+              playerData.board[precedentBoat.x][precedentBoat.y + i] = -1;
+            }
+          } else {
+            console.log("turn error");
+            return;
           }
         }
       }
@@ -275,34 +366,59 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       ...gameBoard[playerTurn],
     };
 
-    //display current boat on the grid
+    if (playerData.board[x][y] === 1) {
+      console.log("wrong placement");
+      return;
+    }
+
     for (let i = 0; i < boatSetupParameters!.length; i++) {
-      // NOTE: Check the direction of the ship
-      if (boatSetupParameters?.direction === "horizontal") {
-        if (playerData.board[x][y + i] === 0) {
-          playerData.board[x][y + i] = 1;
+      if (boatSetupParameters!.direction === "horizontal") {
+        if (!checkCellValidity(x, y + i)) {
+          console.log("placement error");
+          return;
         }
       } else {
-        if (playerData.board[x + i][y] === 0) {
-          playerData.board[x + i][y] = 1;
+        if (!checkCellValidity(x + i, y)) {
+          console.log("placement error");
+          return;
         }
       }
     }
+    //display current boat on the grid
+    for (let i = 0; i < boatSetupParameters!.length; i++) {
+      // NOTE: Check the direction of the ship
+      if (boatSetupParameters!.direction === "horizontal") {
+        //check all free cases around the current one
+        if (checkCellValidity(x, y + i)) {
+          playerData.board[x][y + i] = -1;
+        } else {
+          console.log("placement error");
+          return;
+        }
+      } else {
+        if (checkCellValidity(x + i, y)) {
+          playerData.board[x + i][y] = -1;
+        } else {
+          console.log("placement error");
+          return;
+        }
+      }
+    }
+
     //delete precedent ship of the grid
     if (precedentBoat) {
       for (let i = 0; i < precedentBoat.length; i++) {
         // NOTE: Check the direction of the ship
         if (precedentBoat.direction === "horizontal") {
-          if (playerData.board[precedentBoat.x][precedentBoat.y + i] === 1) {
+          if (playerData.board[precedentBoat.x][precedentBoat.y + i] === -1) {
             playerData.board[precedentBoat.x][precedentBoat.y + i] = 0;
           }
         } else {
-          if (playerData.board[precedentBoat.x + i][precedentBoat.y] === 1) {
+          if (playerData.board[precedentBoat.x + i][precedentBoat.y] === -1) {
             playerData.board[precedentBoat.x + i][precedentBoat.y] = 0;
           }
         }
       }
-      playerData.board[precedentBoat.x][precedentBoat.y] = 0;
     }
 
     setGameBoard({
@@ -411,6 +527,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         initializeGame,
         updateGameBoard,
         updateBoatPlacement,
+        validateShipPlacement,
         setBoatLength,
         turnBoatplacement,
         changePlayerTurn,
