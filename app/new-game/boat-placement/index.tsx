@@ -1,7 +1,7 @@
 import { Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import React, { useState } from "react";
 import { AntDesign } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -23,6 +23,7 @@ export default function BoatPlacement() {
     validateShipPlacement,
     setBoatLength,
     turnBoatplacement,
+    setBoatPlacement,
   } = useGameBoard();
   const [currentShip, setCurrentShip] = useState<ShipSetup>({
     length: boatsArray[0],
@@ -30,7 +31,6 @@ export default function BoatPlacement() {
   });
 
   const boatDisplay: number[][] = Array(currentShip.length).fill(0);
-  const [currentBoatCoordinates, setCurrentBoatCoordinates] = useState(0);
 
   function placeBoat() {
     validateShipPlacement();
@@ -45,22 +45,25 @@ export default function BoatPlacement() {
       setCurrentShip({ length: boatsArray[0], direction: "horizontal" });
       setBoatLength(boatsArray[0]);
       changePlayerTurn();
-      // if (0 playerturn is ???) {
-      // when last player have finished, setBoatPlacement to false
-      // }
+      if (playerTurn === 1) {
+        //when last player have finished, setBoatPlacement to false
+        setBoatPlacement(false);
+        router.push("/game");
+      }
     }
   }
 
   function turnBoat() {
     if (currentShip.direction === "horizontal") {
-      turnBoatplacement("vertical");
+      turnBoatplacement(currentShip.length, "vertical");
       setCurrentShip({ length: currentShip.length, direction: "vertical" });
     } else {
-      turnBoatplacement("horizontal");
+      turnBoatplacement(currentShip.length, "horizontal");
       setCurrentShip({ length: currentShip.length, direction: "horizontal" });
     }
   }
-
+  console.log("player 1 : " + players?.[0].board);
+  console.log("player 2 : " + players?.[1].board);
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View>

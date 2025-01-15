@@ -87,18 +87,13 @@ const GameContext = createContext<{
    * Initialize the game board with minimal data
    */
   initializeGame: (players: Player["name"][], size?: number) => void;
-  placeShip: (
-    name: keyof typeof shipArray,
-    start: {
-      x: number;
-      y: number;
-    },
-    direction: "horizontal" | "vertical",
-  ) => void;
   updateGameBoard: (x: number, y: number) => void;
   validateShipPlacement: () => void;
   setBoatLength: (length: number) => void;
-  turnBoatplacement: (direction: "horizontal" | "vertical") => void;
+  turnBoatplacement: (
+    length: number,
+    direction: "horizontal" | "vertical",
+  ) => void;
   updateBoatPlacement: (x: number, y: number) => void;
   changePlayerTurn: () => void;
   getGameState: () => void;
@@ -131,6 +126,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
   function initializeGame(players: Player["name"][], size = 10) {
     setPrecedentBoat(null);
     setBoatSetupParameters({ length: 2, direction: "horizontal" });
+    setPlayerTurn(0);
 
     const gameBoardArray: number[][] = Array(size)
       .fill(0)
@@ -156,58 +152,6 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     setGameBoard(generateGame);
 
     return;
-  }
-
-  /**
-   * Place a ship on the board
-   * The ship will be place on the board with ether horizontal or vertical direction
-   */
-  function placeShip(
-    name: keyof typeof shipArray,
-    start: {
-      x: number;
-      y: number;
-    },
-    direction: "horizontal" | "vertical" = "horizontal",
-  ) {
-    if (!gameBoard) {
-      return;
-    }
-
-    const playerData = {
-      ...gameBoard[playerTurn],
-    };
-
-    // NOTE: Place a new ship on the board without the coordinates
-    playerData.ships = {
-      ...playerData.ships,
-      [name]: [],
-    };
-
-    // NOTE: Place the ship coordinates on the board
-    for (let i = 0; i < shipArray[name].length; i++) {
-      // NOTE: Check the direction of the ship
-      if (direction === "horizontal") {
-        playerData.ships[name][i] = {
-          x: start.x,
-          y: start.y + i,
-          state: true,
-        };
-        playerData.board[start.x][start.y + i] = 1;
-
-        continue;
-      }
-
-      playerData.ships[name][i] = { x: start.x + i, y: start.y, state: true };
-      playerData.board[start.x + i][start.y] = 1;
-    }
-
-    setGameBoard({
-      ...gameBoard,
-      [playerTurn]: {
-        ...playerData,
-      },
-    });
   }
 
   //check the cells around the selected cell to avoid close placement
@@ -277,7 +221,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const turnBoatplacement = (direction: "horizontal" | "vertical") => {
+  const turnBoatplacement = (
+    length: number,
+    direction: "horizontal" | "vertical",
+  ) => {
     if (!gameBoard) {
       return;
     }
@@ -287,7 +234,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     };
 
     setBoatSetupParameters({
-      length: precedentBoat!.length,
+      length: length,
       direction: direction,
     });
 
@@ -311,7 +258,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         }
       }
       //rotate the ship cell by cell
-      for (let i = 1; i < precedentBoat.length; i++) {
+      for (let i = 1; i < length; i++) {
         // NOTE: Check the direction of the ship
         if (precedentBoat.direction === "horizontal") {
           if (playerData.board[precedentBoat.x][precedentBoat.y + i] === -1) {
@@ -350,6 +297,8 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         length: precedentBoat.length,
         direction: direction,
       });
+    } else {
+      setBoatSetupParameters({ length, direction });
     }
   };
 
@@ -366,6 +315,8 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       ...gameBoard[playerTurn],
     };
 
+    console.log("playerdata : " + playerData.board);
+
     if (playerData.board[x][y] === 1) {
       console.log("wrong placement");
       return;
@@ -379,26 +330,6 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         }
       } else {
         if (!checkCellValidity(x + i, y)) {
-          console.log("placement error");
-          return;
-        }
-      }
-    }
-    //display current boat on the grid
-    for (let i = 0; i < boatSetupParameters!.length; i++) {
-      // NOTE: Check the direction of the ship
-      if (boatSetupParameters!.direction === "horizontal") {
-        //check all free cases around the current one
-        if (checkCellValidity(x, y + i)) {
-          playerData.board[x][y + i] = -1;
-        } else {
-          console.log("placement error");
-          return;
-        }
-      } else {
-        if (checkCellValidity(x + i, y)) {
-          playerData.board[x + i][y] = -1;
-        } else {
           console.log("placement error");
           return;
         }
@@ -421,6 +352,27 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    //display current boat on the grid
+    for (let i = 0; i < boatSetupParameters!.length; i++) {
+      // NOTE: Check the direction of the ship
+      if (boatSetupParameters!.direction === "horizontal") {
+        //check all free cases around the current one
+        if (checkCellValidity(x, y + i)) {
+          playerData.board[x][y + i] = -1;
+        } else {
+          console.log("placement error");
+          return;
+        }
+      } else {
+        if (checkCellValidity(x + i, y)) {
+          playerData.board[x + i][y] = -1;
+        } else {
+          console.log("placement error");
+          return;
+        }
+      }
+    }
+
     setGameBoard({
       ...gameBoard,
       [playerTurn]: {
@@ -436,6 +388,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         direction: boatSetupParameters?.direction,
       });
     }
+    console.log("player : " + playerTurn);
   };
 
   /**
@@ -522,8 +475,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     <GameContext.Provider
       value={{
         players: gameBoard,
-        playerTurn: 0,
-        placeShip,
+        playerTurn,
         initializeGame,
         updateGameBoard,
         updateBoatPlacement,
