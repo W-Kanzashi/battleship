@@ -128,17 +128,15 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     setBoatSetupParameters({ length: 2, direction: "horizontal" });
     setPlayerTurn(0);
 
-    const gameBoardArray: number[][] = Array(size)
-      .fill(0)
-      .map(() => Array(size).fill(0));
-
     let index = 0;
 
     const generateGame = players.reduce(
       (acc, player) => {
         acc[index] = {
           name: player,
-          board: gameBoardArray,
+          board: Array(size)
+            .fill(0)
+            .map(() => Array(size).fill(0)),
           ships: {},
         };
 
