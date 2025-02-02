@@ -1,6 +1,5 @@
 import { useState, createContext, useContext, useEffect } from "react";
 import { useRouter } from "expo-router";
-import { db } from "@/utils/database/database";
 
 type Ship = {
   x: number;
@@ -54,6 +53,15 @@ type Player = {
   ships: Record<string, Ship[]>;
 };
 
+type GameState = {
+  player: number;
+  move: {
+    x: number;
+    y: number;
+  };
+  isShip: boolean;
+};
+
 /**
  * This is the ship data
  * NOTE: Add more data to it if needed
@@ -94,34 +102,33 @@ const GameContext = createContext<{
     length: number,
     direction: "horizontal" | "vertical",
   ) => void;
-  updateBoatPlacement: (x: number, y: number) => void;
+  updateBoatPlacement: (x: number, y: number, isPlacedShip?: boolean) => void;
   changePlayerTurn: () => void;
-  getGameState: () => void;
+  getGameState: () => GameState[];
+  handleReplayMode: ({ mode }: { mode: "game" | "replay" }) => void;
   setBoatPlacement: (state: boolean) => void;
 } | null>(null);
 
 function GameBoardProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const [isReplay, setIsReplay] = useState<boolean>(false);
   const [playerTurn, setPlayerTurn] = useState<number>(0);
   const [gameBoard, setGameBoard] = useState<Record<string, Player> | null>(
     null,
   );
-  const [gameState, setGameState] = useState<
-    {
-      player: number;
-      move: {
-        x: number;
-        y: number;
-      };
-      isShip: boolean;
-    }[]
-  >([]);
+  const [gameState, setGameState] = useState<GameState[]>([]);
   const [boatPlacement, setBoatPlacement] = useState(true);
   const [precedentBoat, setPrecedentBoat] = useState<precedentShip | null>(
     null,
   );
   const [boatSetupParameters, setBoatSetupParameters] =
     useState<ShipSetup | null>({ length: 2, direction: "horizontal" });
+
+  function handleReplayMode({ mode }: { mode: "game" | "replay" }) {
+    if (mode === "replay") {
+      setIsReplay(true);
+    }
+  }
 
   function initializeGame(players: Player["name"][], size = 10) {
     setPrecedentBoat(null);
@@ -397,11 +404,19 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
    *
    * The value of the array is the state of the cell
    * 0 - Empty
-   * 1 - Ship
-   * 2 - Destroyed
+   * 1 - Missile lauched
+   * 2 - Ship
    * 3 - Destroyed and ship
    */
-  const updateGameBoard = (x: number, y: number) => {
+  const updateGameBoard = (
+    x: number,
+    y: number,
+    /**
+     * This is for the replay mode
+     * it set if the selected cell is a ship
+     */
+    isPlacedShip: boolean = false,
+  ) => {
     if (boatPlacement) {
       return;
     }
@@ -444,6 +459,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
+    if (isReplay && isPlacedShip) {
+      playerData.board[x][y] = 3;
+    }
+
     setGameBoard({
       ...gameBoard,
       [playerTurn]: {
@@ -469,18 +488,24 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     setPlayerTurn(playerTurn === 0 ? 1 : 0);
   };
 
+  const getGameState = () => {
+    return gameState;
+  };
+
   return (
     <GameContext.Provider
       value={{
         players: gameBoard,
         playerTurn,
         initializeGame,
+        getGameState,
         updateGameBoard,
         updateBoatPlacement,
         validateShipPlacement,
         setBoatLength,
         turnBoatplacement,
         changePlayerTurn,
+        handleReplayMode,
         setBoatPlacement,
       }}
     >

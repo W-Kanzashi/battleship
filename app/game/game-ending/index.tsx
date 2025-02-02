@@ -1,21 +1,40 @@
-import { Button, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 
 import { Text, View } from "@/components/Themed";
 import { Link } from "expo-router";
 import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useGameBoard } from "@/utils/store/game";
+import { useSQLiteContext } from "@/utils/database/provider";
 
 export default function GameEnding() {
+  const { getGameState, players, playerTurn } = useGameBoard();
+  const { saveGame } = useSQLiteContext();
+
+  const handleGameEnding = () => {
+    const gameState = getGameState();
+
+    saveGame(gameState);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <View style={styles.container}>
-        <Text style={[styles.title, styles.winnerCase]}>Player 1 name</Text>
+        <Text style={[styles.title, styles.winnerCase]}>
+          {players?.[playerTurn].name}
+        </Text>
+
         <Text style={styles.winnerFont}>Winner</Text>
-        <Text style={styles.title}>Player 2 name</Text>
+        <Text style={styles.title}>{players?.[playerTurn].name}</Text>
         <Text style={styles.looserFont}>Looser</Text>
-        <Link href="/home" style={styles.pressableButton} asChild>
-          <Pressable>
-            <Text style={styles.buttonText}>Return to home</Text>
+
+        <Pressable style={styles.pressableButton} onPress={handleGameEnding}>
+          <Text style={styles.buttonText}>Save the game</Text>
+        </Pressable>
+
+        <Link href="/" asChild>
+          <Pressable style={styles.pressableButton}>
+            <Text style={styles.buttonText}>End the game</Text>
           </Pressable>
         </Link>
       </View>

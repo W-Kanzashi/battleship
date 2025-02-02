@@ -5,13 +5,12 @@ import { Cell } from "./cell";
 
 const CELL_SIZE = 30;
 
-function Board(props: { children: ReactNode }) {
-  return <View>{props.children}</View>;
+function Board(props: { children: ReactNode; style?: ViewStyle }) {
+  return <View style={props.style}>{props.children}</View>;
 }
 
 function BoardGrid(props: { children: ReactNode }) {
   const { playerTurn, players } = useGameBoard();
-  console.log("board player turn " + players?.[playerTurn].board, playerTurn);
 
   if (!players) {
     throw new Error(

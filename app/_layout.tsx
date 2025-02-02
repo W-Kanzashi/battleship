@@ -7,12 +7,15 @@ import {
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import "react-native-reanimated";
-
 import { useColorScheme } from "@/components/useColorScheme";
 import { GameBoardProvider } from "@/utils/store/game";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SQLiteProvider } from "expo-sqlite";
+import { migrateDbIfNeeded } from "@/utils/database/database";
+import { SQLiteDatabaseProvider } from "@/utils/database/provider";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -23,6 +26,8 @@ export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "/",
 };
+
+const queryClient = new QueryClient();
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -56,16 +61,28 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
-      <GameBoardProvider>
-        <SafeAreaProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="new-game" />
-            <Stack.Screen name="rules" />
-            <Stack.Screen name="game" />
-          </Stack>
-        </SafeAreaProvider>
-      </GameBoardProvider>
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={null}>
+          <SQLiteProvider
+            databaseName="battle_game.db"
+            onInit={migrateDbIfNeeded}
+            useSuspense
+          >
+            <SQLiteDatabaseProvider>
+              <GameBoardProvider>
+                <SafeAreaProvider>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="new-game" />
+                    <Stack.Screen name="rules" />
+                    <Stack.Screen name="game" />
+                  </Stack>
+                </SafeAreaProvider>
+              </GameBoardProvider>
+            </SQLiteDatabaseProvider>
+          </SQLiteProvider>
+        </Suspense>
+      </QueryClientProvider>
     </ThemeProvider>
   );
 }
