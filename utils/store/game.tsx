@@ -95,14 +95,14 @@ const GameContext = createContext<{
    * Initialize the game board with minimal data
    */
   initializeGame: (players: Player["name"][], size?: number) => void;
-  updateGameBoard: (x: number, y: number) => void;
+  updateGameBoard: (x: number, y: number, isPlacedShip?: boolean) => void;
   validateShipPlacement: () => void;
   setBoatLength: (length: number) => void;
   turnBoatplacement: (
     length: number,
     direction: "horizontal" | "vertical",
   ) => void;
-  updateBoatPlacement: (x: number, y: number, isPlacedShip?: boolean) => void;
+  updateBoatPlacement: (x: number, y: number) => void;
   changePlayerTurn: () => void;
   getGameState: () => GameState[];
   handleReplayMode: ({ mode }: { mode: "game" | "replay" }) => void;

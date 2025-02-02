@@ -10,17 +10,17 @@ const GameHistoryScreen = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const { saveGame } = useSQLiteContext();
 
-  // useEffect(() => {
-  //   const fetchGameHistory = async () => {
-  //     try {
-  //       const history = db.getGameHistory();
-  //       setGameHistory(history);
-  //     } catch (error) {
-  //       console.error("Error fetching game history:", error);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchGameHistory = async () => {
+      try {
+        const history = db.getGameHistory();
+        setGameHistory(history);
+      } catch (error) {
+        console.error("Error fetching game history:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchGameHistory();
   }, []); // Ce useEffect se lance une fois lors du montage du composant
@@ -99,14 +99,14 @@ const GameHistoryScreen = () => {
     }
   };
 
-  // // Si les données sont en cours de chargement
-  // if (loading) {
-  //   return (
-  //     <View style={styles.center}>
-  //       <Text>Chargement...</Text>
-  //     </View>
-  //   );
-  // }
+  // Si les données sont en cours de chargement
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <Text>Chargement...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView
