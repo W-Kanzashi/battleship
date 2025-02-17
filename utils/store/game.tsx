@@ -192,30 +192,39 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     if (!boatPlacement) {
       return false;
     }
-
+  
     if (!gameBoard) {
       return false;
     }
     const playerData = {
       ...gameBoard[playerTurn],
     };
-
-    //use the precedent placed boat and convert all his cells values from -1 to 1
+  
+    //use the precedent placed boat and convert all his cells values from -1 to 2
     if (precedentBoat) {
       for (let i = 0; i < precedentBoat.length; i++) {
         // NOTE: Check the direction of the ship
         if (precedentBoat.direction === "horizontal") {
           if (playerData.board[precedentBoat.x][precedentBoat.y + i] === -1) {
-            playerData.board[precedentBoat.x][precedentBoat.y + i] = 1;
+            playerData.board[precedentBoat.x][precedentBoat.y + i] = 2; // Changé de 1 à 2
           }
         } else {
           if (playerData.board[precedentBoat.x + i][precedentBoat.y] === -1) {
-            playerData.board[precedentBoat.x + i][precedentBoat.y] = 1;
+            playerData.board[precedentBoat.x + i][precedentBoat.y] = 2; // Changé de 1 à 2
           }
         }
       }
     }
+    
+    // Mettre à jour le plateau avec les nouvelles données
+    setGameBoard({
+      ...gameBoard,
+      [playerTurn]: playerData
+    });
+    
     setPrecedentBoat(null);
+    
+    return true;
   };
 
   //configure the current ship length
@@ -408,80 +417,82 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
    * 2 - Ship
    * 3 - Destroyed and ship
    */
-  const updateGameBoard = (
-    x: number,
-    y: number,
-    /**
-     * This is for the replay mode
-     * it set if the selected cell is a ship
-     */
-    isPlacedShip: boolean = false,
-  ) => {
+  const updateGameBoard = (x: number, y: number) => {
+    console.log(`Tir sur la case (${x}, ${y})`);
+    
     if (boatPlacement) {
+      console.log("Phase de placement en cours, tir non autorisé.");
       return;
     }
-
+    
     if (!gameBoard) {
+      console.log("Erreur : gameBoard non défini");
       return;
     }
-
-    const playerData = {
-      ...gameBoard[playerTurn],
-    };
-
+    
+    const opponent = playerTurn === 0 ? 1 : 0;
+    const opponentData = JSON.parse(JSON.stringify(gameBoard[opponent])); // Deep Copy
+    
     let isShip = false;
-
-    if (playerData.board[x][y] === 0) {
-      playerData.board[x][y] = 1;
-    }
-
-    if (playerData.board[x][y] === 2) {
-      playerData.board[x][y] = 3;
-
-      const ships = Object.entries(playerData.ships)
-        .find(
-          ([_key, value]) =>
-            value.find((p) => p.x === x) && value.find((p) => p.y === y),
-        )?.[1]
-        .find((p) => p.x === x && p.y === y);
-
+    
+    if (opponentData.board[x][y] === 0) {
+      console.log("Tir manqué !");
+      opponentData.board[x][y] = 1; // Missed shot
+    } else if (opponentData.board[x][y] === 2) {
+      console.log("Tir touché !");
+      opponentData.board[x][y] = 3; // Hit
+      isShip = true;
+      
+      // Vérifier si le bateau entier est détruit
+      const shipsEntry = Object.entries(opponentData.ships)
+        .find(([_, value]) => Array.isArray(value) && value.some((p: Ship) => p.x === x && p.y === y));
+      
+      const ships: Ship[] | undefined = shipsEntry ? (shipsEntry[1] as Ship[]) : undefined;
+      
       if (ships) {
-        ships.state = false;
-        isShip = true;
-
-        if (
-          Object.entries(playerData.ships).every(([_, p]) =>
-            p.every((k) => k.state === false),
-          )
-        ) {
+        const hitShip = ships.find((p: Ship) => p.x === x && p.y === y);
+        if (hitShip) {
+          hitShip.state = false;
+        }
+        
+        // Vérifier si tout le bateau est coulé
+        const isSunk = ships.every((p: Ship) => !p.state);
+        if (isSunk) {
+          console.log("Bateau coulé !");
+        }
+        
+        // Vérifier si la partie est terminée
+        const allShipsSunk = Object.values(opponentData.ships)
+          .every((ship) => Array.isArray(ship) && ship.every((cell: Ship) => !cell.state));
+        
+        if (allShipsSunk) {
+          console.log("Le joueur " + (playerTurn + 1) + " a gagné !");
           router.push("/game/game-ending");
         }
       }
+    } else {
+      console.log("Case déjà touchée, action ignorée.");
+      return;
     }
-
-    if (isReplay && isPlacedShip) {
-      playerData.board[x][y] = 3;
-    }
-
-    setGameBoard({
-      ...gameBoard,
-      [playerTurn]: {
-        ...playerData,
-      },
+    
+    setGameBoard(prevGameBoard => {
+      if (!prevGameBoard) {
+        return prevGameBoard;
+      }
+      const newBoard = { ...prevGameBoard, [opponent]: opponentData }; // Nouvelle référence
+      console.log("Mise à jour du gameBoard :", newBoard);
+      return newBoard;
     });
+    
+    setGameState(prevGameState => {
+      const newGameState = [...prevGameState, { player: playerTurn, move: { x, y }, isShip }];
+      console.log("Nouvel état du jeu :", newGameState);
+      return newGameState;
+    });
+    
+};
 
-    setGameState([
-      ...gameState,
-      {
-        player: playerTurn,
-        move: {
-          x: x,
-          y: y,
-        },
-        isShip: isShip,
-      },
-    ]);
-  };
+
 
   // TODO: Make this function dynamic to be able to play with different number of players
   const changePlayerTurn = () => {
