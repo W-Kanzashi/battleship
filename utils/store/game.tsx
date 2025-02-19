@@ -476,6 +476,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
             (ship) =>
               Array.isArray(ship) && ship.every((cell: Ship) => !cell.state),
           );
+          console.log("shipsunk : " + allShipsSunk)
 
           if (allShipsSunk) {
             console.log("Le joueur " + (playerTurn + 1) + " a gagné !");
