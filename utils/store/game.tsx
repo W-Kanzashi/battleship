@@ -469,6 +469,9 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
           // Vérifier si tout le bateau est coulé
           const isSunk = ships.every((p: Ship) => !p.state);
           if (isSunk) {
+            ships.forEach(p => {
+              opponentData.board[p.x][p.y] = 4;
+            });
             Alert.alert("Bateau coulé !");
 
             console.log("Bateau coulé !");

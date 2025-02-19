@@ -124,8 +124,9 @@ export default function GameScreen() {
                     disabled={cellValue === 1 || cellValue === 3}
                   >
                     <Text style={styles.cellText}>
-                      {cellValue === 3 ? "X" : cellValue === 1 ? "·" : ""}
-                    </Text>
+  {cellValue === 4 ? "❌" : cellValue === 3 ? "X" : cellValue === 1 ? "·" : ""}
+</Text>
+
                   </Pressable>
                 ))}
               </View>
