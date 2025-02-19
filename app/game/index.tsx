@@ -88,6 +88,7 @@ export default function GameScreen() {
         );
       }
     } else {
+      Alert.alert("Raté", `${currentPlayerName} a manqué sa cible !`);
       setMessage(`${currentPlayerName} a manqué sa cible !`);
       if (!gameOver) {
         changePlayerTurn();
