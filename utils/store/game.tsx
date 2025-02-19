@@ -185,17 +185,32 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
 
     //use the precedent placed boat and convert all his cells values from -1 to 2
     if (precedentBoat) {
+      let ships = [];
       for (let i = 0; i < precedentBoat.length; i++) {
         // NOTE: Check the direction of the ship
         if (precedentBoat.direction === "horizontal") {
           if (playerData.board[precedentBoat.x][precedentBoat.y + i] === -1) {
             playerData.board[precedentBoat.x][precedentBoat.y + i] = 2; // Changé de 1 à 2
+            ships.push({
+              x: precedentBoat.x,
+              y: precedentBoat.y + i,
+              state: true,
+            });
           }
         } else {
           if (playerData.board[precedentBoat.x + i][precedentBoat.y] === -1) {
             playerData.board[precedentBoat.x + i][precedentBoat.y] = 2; // Changé de 1 à 2
+            ships.push({
+              x: precedentBoat.x + i,
+              y: precedentBoat.y,
+              state: true,
+            });
           }
         }
+        playerData.ships = {
+          ...playerData.ships,
+          [precedentBoat.length]: ships,
+        };
       }
     }
 
