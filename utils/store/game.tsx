@@ -1,5 +1,6 @@
 import { useState, createContext, useContext } from "react";
 import { useRouter } from "expo-router";
+import { Alert } from "react-native";
 
 type Ship = {
   x: number;
@@ -468,6 +469,8 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
           // Vérifier si tout le bateau est coulé
           const isSunk = ships.every((p: Ship) => !p.state);
           if (isSunk) {
+            Alert.alert("Bateau coulé !");
+
             console.log("Bateau coulé !");
           }
 
