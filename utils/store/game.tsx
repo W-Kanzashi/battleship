@@ -177,10 +177,10 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (
-      playerData.board[x - 1 < 0 ? x : x - 1][y] === 1 ||
-      playerData.board[x][y - 1] === 1 ||
-      playerData.board[x + 1 > 9 ? x : x + 1][y] === 1 ||
-      playerData.board[x][y + 1] === 1
+      playerData.board[x - 1 < 0 ? x : x - 1][y] === 2 ||
+      playerData.board[x][y - 1] === 2 ||
+      playerData.board[x + 1 > 9 ? x : x + 1][y] === 2 ||
+      playerData.board[x][y + 1] === 2
     ) {
       return false;
     } else {
@@ -192,14 +192,14 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
     if (!boatPlacement) {
       return false;
     }
-  
+
     if (!gameBoard) {
       return false;
     }
     const playerData = {
       ...gameBoard[playerTurn],
     };
-  
+
     //use the precedent placed boat and convert all his cells values from -1 to 2
     if (precedentBoat) {
       for (let i = 0; i < precedentBoat.length; i++) {
@@ -215,15 +215,15 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
         }
       }
     }
-    
+
     // Mettre à jour le plateau avec les nouvelles données
     setGameBoard({
       ...gameBoard,
-      [playerTurn]: playerData
+      [playerTurn]: playerData,
     });
-    
+
     setPrecedentBoat(null);
-    
+
     return true;
   };
 
@@ -331,7 +331,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
 
     console.log("playerdata : " + playerData.board);
 
-    if (playerData.board[x][y] === 1) {
+    if (playerData.board[x][y] === 2) {
       console.log("wrong placement");
       return;
     }
@@ -419,22 +419,22 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
    */
   const updateGameBoard = (x: number, y: number) => {
     console.log(`Tir sur la case (${x}, ${y})`);
-    
+
     if (boatPlacement) {
       console.log("Phase de placement en cours, tir non autorisé.");
       return;
     }
-    
+
     if (!gameBoard) {
       console.log("Erreur : gameBoard non défini");
       return;
     }
-    
+
     const opponent = playerTurn === 0 ? 1 : 0;
     const opponentData = JSON.parse(JSON.stringify(gameBoard[opponent])); // Deep Copy
-    
+
     let isShip = false;
-    
+
     if (opponentData.board[x][y] === 0) {
       console.log("Tir manqué !");
       opponentData.board[x][y] = 1; // Missed shot
@@ -442,29 +442,36 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       console.log("Tir touché !");
       opponentData.board[x][y] = 3; // Hit
       isShip = true;
-      
+
       // Vérifier si le bateau entier est détruit
-      const shipsEntry = Object.entries(opponentData.ships)
-        .find(([_, value]) => Array.isArray(value) && value.some((p: Ship) => p.x === x && p.y === y));
-      
-      const ships: Ship[] | undefined = shipsEntry ? (shipsEntry[1] as Ship[]) : undefined;
-      
+      const shipsEntry = Object.entries(opponentData.ships).find(
+        ([_, value]) =>
+          Array.isArray(value) &&
+          value.some((p: Ship) => p.x === x && p.y === y),
+      );
+
+      const ships: Ship[] | undefined = shipsEntry
+        ? (shipsEntry[1] as Ship[])
+        : undefined;
+
       if (ships) {
         const hitShip = ships.find((p: Ship) => p.x === x && p.y === y);
         if (hitShip) {
           hitShip.state = false;
         }
-        
+
         // Vérifier si tout le bateau est coulé
         const isSunk = ships.every((p: Ship) => !p.state);
         if (isSunk) {
           console.log("Bateau coulé !");
         }
-        
+
         // Vérifier si la partie est terminée
-        const allShipsSunk = Object.values(opponentData.ships)
-          .every((ship) => Array.isArray(ship) && ship.every((cell: Ship) => !cell.state));
-        
+        const allShipsSunk = Object.values(opponentData.ships).every(
+          (ship) =>
+            Array.isArray(ship) && ship.every((cell: Ship) => !cell.state),
+        );
+
         if (allShipsSunk) {
           console.log("Le joueur " + (playerTurn + 1) + " a gagné !");
           router.push("/game/game-ending");
@@ -474,8 +481,8 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       console.log("Case déjà touchée, action ignorée.");
       return;
     }
-    
-    setGameBoard(prevGameBoard => {
+
+    setGameBoard((prevGameBoard) => {
       if (!prevGameBoard) {
         return prevGameBoard;
       }
@@ -483,16 +490,16 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       console.log("Mise à jour du gameBoard :", newBoard);
       return newBoard;
     });
-    
-    setGameState(prevGameState => {
-      const newGameState = [...prevGameState, { player: playerTurn, move: { x, y }, isShip }];
+
+    setGameState((prevGameState) => {
+      const newGameState = [
+        ...prevGameState,
+        { player: playerTurn, move: { x, y }, isShip },
+      ];
       console.log("Nouvel état du jeu :", newGameState);
       return newGameState;
     });
-    
-};
-
-
+  };
 
   // TODO: Make this function dynamic to be able to play with different number of players
   const changePlayerTurn = () => {
