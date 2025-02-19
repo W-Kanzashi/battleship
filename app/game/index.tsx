@@ -52,7 +52,7 @@ export default function GameScreen() {
     const { x, y } = selectedCell;
     const cellValue = opponentBoard[x][y];
     updateGameBoard(x, y);
-    if (cellValue === 2) {
+   /* if (cellValue === 2) {
       const allShipsSunk = opponentBoard.flat().every((cell) => cell !== 2);
       if (allShipsSunk) {
         setGameOver(true);
@@ -62,7 +62,7 @@ export default function GameScreen() {
         );
         return;
       }
-    }
+    } */
 
     if (cellValue === 2) {
       updateGameBoard(x, y);
