@@ -471,6 +471,7 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
           if (isSunk) {
             ships.forEach(p => {
               opponentData.board[p.x][p.y] = 4;
+              addMissedCellsAround(p.x, p.y, opponentData.board);
             });
             Alert.alert("Bateau coulé !");
 
@@ -517,6 +518,26 @@ function GameBoardProvider({ children }: { children: React.ReactNode }) {
       return newGameState;
     });
   };
+
+  const addMissedCellsAround = (x: number, y: number, board: number[][]) => {
+    const directions = [
+      [-1, -1], [-1, 0], [-1, 1],  // Haut-gauche, Haut, Haut-droite
+      [0, -1],         [0, 1],   // Gauche, Droite
+      [1, -1], [1, 0], [1, 1]   // Bas-gauche, Bas, Bas-droite
+    ];
+  
+    directions.forEach(([dx, dy]) => {
+      const newX = x + dx;
+      const newY = y + dy;
+  
+      if (newX >= 0 && newX < board.length && newY >= 0 && newY < board[0].length) {
+        if (board[newX][newY] === 0) { // Ne pas écraser un bateau
+          board[newX][newY] = 1; // Case ratée
+        }
+      }
+    });
+  };
+  
 
   // TODO: Make this function dynamic to be able to play with different number of players
   const changePlayerTurn = () => {
