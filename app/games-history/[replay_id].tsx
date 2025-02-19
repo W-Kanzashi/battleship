@@ -14,7 +14,8 @@ export default function ReplayScreen() {
   const [move, setMove] = useState<number>(0);
   const { getGameHistoryById, getGame } = useSQLiteContext();
   const {
-    handleReplayMode,
+    players,
+    handleMode,
     initializeGame,
     updateGameBoard,
     changePlayerTurn,
@@ -22,7 +23,7 @@ export default function ReplayScreen() {
   const { data: game, isLoading } = useQuery({
     queryKey: ["gameHistory", replay_id],
     queryFn: () => {
-      handleReplayMode({ mode: "replay" });
+      handleMode({ mode: "replay" });
 
       const gameHistory = getGameHistoryById(replay_id);
       const game = getGame(replay_id);
@@ -248,21 +249,23 @@ export default function ReplayScreen() {
           </Pressable>
         </View>
 
-        <Board
-          style={{
-            paddingHorizontal: 16,
-          }}
-        >
-          <BoardInfo type="alpha" />
-          <BoardGrid>
-            <BoardInfo
-              style={{
-                flexDirection: "column",
-                marginLeft: 0,
-              }}
-            />
-          </BoardGrid>
-        </Board>
+        {players ? (
+          <Board
+            style={{
+              paddingHorizontal: 16,
+            }}
+          >
+            <BoardInfo type="alpha" />
+            <BoardGrid>
+              <BoardInfo
+                style={{
+                  flexDirection: "column",
+                  marginLeft: 0,
+                }}
+              />
+            </BoardGrid>
+          </Board>
+        ) : null}
 
         {move + 1 === game[1].data.length ? (
           <View>

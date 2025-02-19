@@ -23,7 +23,7 @@ export default function BoatPlacement() {
     validateShipPlacement,
     setBoatLength,
     turnBoatplacement,
-    setBoatPlacement,
+    handleMode,
   } = useGameBoard();
   const [currentShip, setCurrentShip] = useState<ShipSetup>({
     length: boatsArray[0],
@@ -47,7 +47,9 @@ export default function BoatPlacement() {
       changePlayerTurn();
       if (playerTurn === 1) {
         //when last player have finished, setBoatPlacement to false
-        setBoatPlacement(false);
+        handleMode({
+          mode: "game",
+        });
         router.push("/game");
       }
     }
